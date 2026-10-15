@@ -111,20 +111,20 @@ namespace Calculator.Tests
 
             var converterCategories = converterGroup.Categories;
             Assert.AreEqual(14, converterCategories.Count);
-            ValidateNavCategory(converterCategories, 0, ViewMode.Currency);
-            ValidateNavCategory(converterCategories, 1, ViewMode.Volume);
-            ValidateNavCategory(converterCategories, 2, ViewMode.Length);
-            ValidateNavCategory(converterCategories, 3, ViewMode.Weight);
-            ValidateNavCategory(converterCategories, 4, ViewMode.Temperature);
-            ValidateNavCategory(converterCategories, 5, ViewMode.Energy);
-            ValidateNavCategory(converterCategories, 6, ViewMode.Area);
-            ValidateNavCategory(converterCategories, 7, ViewMode.Speed);
-            ValidateNavCategory(converterCategories, 8, ViewMode.Time);
-            ValidateNavCategory(converterCategories, 9, ViewMode.Power);
-            ValidateNavCategory(converterCategories, 10, ViewMode.Data);
-            ValidateNavCategory(converterCategories, 11, ViewMode.Pressure);
-            ValidateNavCategory(converterCategories, 12, ViewMode.Angle);
-            ValidateNavCategory(converterCategories, 13, ViewMode.SapUnit);
+            ValidateNavCategory(converterCategories, 0, ViewMode.SapUnit);
+            ValidateNavCategory(converterCategories, 1, ViewMode.Currency);
+            ValidateNavCategory(converterCategories, 2, ViewMode.Volume);
+            ValidateNavCategory(converterCategories, 3, ViewMode.Length);
+            ValidateNavCategory(converterCategories, 4, ViewMode.Weight);
+            ValidateNavCategory(converterCategories, 5, ViewMode.Temperature);
+            ValidateNavCategory(converterCategories, 6, ViewMode.Energy);
+            ValidateNavCategory(converterCategories, 7, ViewMode.Area);
+            ValidateNavCategory(converterCategories, 8, ViewMode.Speed);
+            ValidateNavCategory(converterCategories, 9, ViewMode.Time);
+            ValidateNavCategory(converterCategories, 10, ViewMode.Power);
+            ValidateNavCategory(converterCategories, 11, ViewMode.Data);
+            ValidateNavCategory(converterCategories, 12, ViewMode.Pressure);
+            ValidateNavCategory(converterCategories, 13, ViewMode.Angle);
         }
 
         private void ValidateNavCategory(IList<NavCategory> categories, int index, ViewMode expectedMode)
@@ -143,7 +143,7 @@ namespace Calculator.Tests
     {
         private static readonly ViewMode[] OrderedModes =
         {
-            ViewMode.Standard, ViewMode.Scientific, ViewMode.Graphing, ViewMode.Programmer, ViewMode.Date, ViewMode.Currency,
+            ViewMode.Standard, ViewMode.Scientific, ViewMode.Graphing, ViewMode.Programmer, ViewMode.Date, ViewMode.SapUnit, ViewMode.Currency,
             ViewMode.Volume, ViewMode.Length, ViewMode.Weight, ViewMode.Temperature, ViewMode.Energy, ViewMode.Area,
             ViewMode.Speed, ViewMode.Time, ViewMode.Power, ViewMode.Data, ViewMode.Pressure, ViewMode.Angle
         };
@@ -194,6 +194,7 @@ namespace Calculator.Tests
             Assert.AreEqual(ViewMode.Data, NavCategoryStates.Deserialize(13));
             Assert.AreEqual(ViewMode.Pressure, NavCategoryStates.Deserialize(14));
             Assert.AreEqual(ViewMode.Angle, NavCategoryStates.Deserialize(15));
+            Assert.AreEqual(ViewMode.SapUnit, NavCategoryStates.Deserialize(18));
         }
 
         [TestMethod]
@@ -204,7 +205,7 @@ namespace Calculator.Tests
 
             // Boundary testing
             Assert.AreEqual(ViewMode.None, NavCategoryStates.Deserialize(-1));
-            Assert.AreEqual(ViewMode.None, NavCategoryStates.Deserialize(18));
+            Assert.AreEqual(ViewMode.None, NavCategoryStates.Deserialize(19));
         }
 
         [TestMethod]
@@ -234,8 +235,8 @@ namespace Calculator.Tests
         public void IsValidViewMode_AllInvalid()
         {
             Assert.IsFalse(NavCategoryStates.IsValidViewMode(ViewMode.None));
-            Assert.IsTrue(NavCategoryStates.IsValidViewMode((ViewMode)17));
-            Assert.IsFalse(NavCategoryStates.IsValidViewMode((ViewMode)18));
+            Assert.IsTrue(NavCategoryStates.IsValidViewMode((ViewMode)18));
+            Assert.IsFalse(NavCategoryStates.IsValidViewMode((ViewMode)19));
 
             // Also verify the lower bound
             Assert.IsTrue(NavCategoryStates.IsValidViewMode((ViewMode)0));
@@ -333,19 +334,20 @@ namespace Calculator.Tests
             Assert.AreEqual(2, NavCategoryStates.GetIndexInGroup(ViewMode.Graphing, CategoryGroupType.Calculator));
             Assert.AreEqual(3, NavCategoryStates.GetIndexInGroup(ViewMode.Programmer, CategoryGroupType.Calculator));
             Assert.AreEqual(4, NavCategoryStates.GetIndexInGroup(ViewMode.Date, CategoryGroupType.Calculator));
-            Assert.AreEqual(0, NavCategoryStates.GetIndexInGroup(ViewMode.Currency, CategoryGroupType.Converter));
-            Assert.AreEqual(1, NavCategoryStates.GetIndexInGroup(ViewMode.Volume, CategoryGroupType.Converter));
-            Assert.AreEqual(2, NavCategoryStates.GetIndexInGroup(ViewMode.Length, CategoryGroupType.Converter));
-            Assert.AreEqual(3, NavCategoryStates.GetIndexInGroup(ViewMode.Weight, CategoryGroupType.Converter));
-            Assert.AreEqual(4, NavCategoryStates.GetIndexInGroup(ViewMode.Temperature, CategoryGroupType.Converter));
-            Assert.AreEqual(5, NavCategoryStates.GetIndexInGroup(ViewMode.Energy, CategoryGroupType.Converter));
-            Assert.AreEqual(6, NavCategoryStates.GetIndexInGroup(ViewMode.Area, CategoryGroupType.Converter));
-            Assert.AreEqual(7, NavCategoryStates.GetIndexInGroup(ViewMode.Speed, CategoryGroupType.Converter));
-            Assert.AreEqual(8, NavCategoryStates.GetIndexInGroup(ViewMode.Time, CategoryGroupType.Converter));
-            Assert.AreEqual(9, NavCategoryStates.GetIndexInGroup(ViewMode.Power, CategoryGroupType.Converter));
-            Assert.AreEqual(10, NavCategoryStates.GetIndexInGroup(ViewMode.Data, CategoryGroupType.Converter));
-            Assert.AreEqual(11, NavCategoryStates.GetIndexInGroup(ViewMode.Pressure, CategoryGroupType.Converter));
-            Assert.AreEqual(12, NavCategoryStates.GetIndexInGroup(ViewMode.Angle, CategoryGroupType.Converter));
+            Assert.AreEqual(0, NavCategoryStates.GetIndexInGroup(ViewMode.SapUnit, CategoryGroupType.Converter));
+            Assert.AreEqual(1, NavCategoryStates.GetIndexInGroup(ViewMode.Currency, CategoryGroupType.Converter));
+            Assert.AreEqual(2, NavCategoryStates.GetIndexInGroup(ViewMode.Volume, CategoryGroupType.Converter));
+            Assert.AreEqual(3, NavCategoryStates.GetIndexInGroup(ViewMode.Length, CategoryGroupType.Converter));
+            Assert.AreEqual(4, NavCategoryStates.GetIndexInGroup(ViewMode.Weight, CategoryGroupType.Converter));
+            Assert.AreEqual(5, NavCategoryStates.GetIndexInGroup(ViewMode.Temperature, CategoryGroupType.Converter));
+            Assert.AreEqual(6, NavCategoryStates.GetIndexInGroup(ViewMode.Energy, CategoryGroupType.Converter));
+            Assert.AreEqual(7, NavCategoryStates.GetIndexInGroup(ViewMode.Area, CategoryGroupType.Converter));
+            Assert.AreEqual(8, NavCategoryStates.GetIndexInGroup(ViewMode.Speed, CategoryGroupType.Converter));
+            Assert.AreEqual(9, NavCategoryStates.GetIndexInGroup(ViewMode.Time, CategoryGroupType.Converter));
+            Assert.AreEqual(10, NavCategoryStates.GetIndexInGroup(ViewMode.Power, CategoryGroupType.Converter));
+            Assert.AreEqual(11, NavCategoryStates.GetIndexInGroup(ViewMode.Data, CategoryGroupType.Converter));
+            Assert.AreEqual(12, NavCategoryStates.GetIndexInGroup(ViewMode.Pressure, CategoryGroupType.Converter));
+            Assert.AreEqual(13, NavCategoryStates.GetIndexInGroup(ViewMode.Angle, CategoryGroupType.Converter));
 
             Assert.AreEqual(-1, NavCategoryStates.GetIndexInGroup(ViewMode.None, CategoryGroupType.Calculator));
             Assert.AreEqual(-1, NavCategoryStates.GetIndexInGroup(ViewMode.None, CategoryGroupType.Converter));
