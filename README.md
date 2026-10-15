@@ -51,6 +51,10 @@ Dá para ter vários fatores ao mesmo tempo (ex.: `1 PC = 1000 M2` e `1 PC = 100
 
 Visual da calculadora ajustado para o azul, inspirado na identidade do SAP.
 
+### Ícone próprio
+
+Ícone "UM" azul (Unidade de Medida) no lugar do ícone de desenvolvimento da calculadora original. Todos os tamanhos são gerados por `Tools/Icons/gen_icons.py`.
+
 ## Como compilar
 
 Pré-requisitos (iguais ao projeto original):
@@ -84,7 +88,7 @@ git clone https://github.com/devbispojunio/calculadora-sap.git
 - Os códigos e fatores seguem o padrão da T006. Se o seu sistema tiver unidades customizadas (Z) ou códigos diferentes, confira na **CUNI** e ajuste o `SapUnitsOfMeasure.cs`.
 - Unidades de embalagem (CX, PAL, FD...) não têm fator fixo — use o **Fator do material**.
 - O mês (MON) é considerado 30 dias e o ano (YR) 365 dias.
-- Telemetria: os eventos de diagnóstico (TraceLogging) herdados do projeto original estão desativados neste fork; o app não envia dados para ninguém.
+- Telemetria: a telemetria herdada do projeto original foi desativada no código C# (TraceLogging), mas o componente C++ do gráfico (GraphControl) ainda contém código de telemetria. O conversor de **Moeda** acessa a internet para baixar as cotações; os demais conversores, incluindo o de Unidade de Medida (SAP), funcionam offline.
 
 ## Créditos e licença
 

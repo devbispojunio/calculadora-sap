@@ -1225,6 +1225,18 @@ namespace CalculatorApp.ViewModel
                     if (_isCurrencyDataLoaded && !CurrencyDataLoadFailed)
                     {
                         _model.ResetCategoriesAndRatios();
+
+                        // The reset moves the engine to the first ready category. Currency used to be first,
+                        // but "Unidade de Medida (SAP)" now is, so put the engine back on Currency explicitly.
+                        // Otherwise currency units end up stored against the SAP category and its default
+                        // units (G -> KG) are lost, which made the SAP converter open as MG -> MG.
+                        _model.SetCurrentCategory(
+                            new CalcManager.Interop.CategoryWrapper
+                            {
+                                Id = CurrentCategory.GetModelCategoryId(),
+                                Name = CurrentCategory.Name,
+                                SupportsNegative = CurrentCategory.NegateVisibility == Windows.UI.Xaml.Visibility.Visible
+                            });
                     }
 
                     SetSelectedCurrencyUnits();
@@ -1240,9 +1252,54 @@ namespace CalculatorApp.ViewModel
                     });
 
                 BuildUnitList(result.Units);
+
+                if (TrySelectSapDefaultUnits(result.FromUnit, result.ToUnit))
+                {
+                    return;
+                }
+
                 UnitFrom = FindUnitInList(result.FromUnit);
                 UnitTo = FindUnitInList(result.ToUnit);
             }
+        }
+
+        /// <summary>
+        /// Unidade de Medida (SAP): when the engine has no valid pair (or the same unit on both sides,
+        /// e.g. MG -> MG saved by an older build), open with the default G -> KG instead.
+        /// </summary>
+        private bool TrySelectSapDefaultUnits(CalcManager.Interop.UnitWrapper fromUnit, CalcManager.Interop.UnitWrapper toUnit)
+        {
+            if (CurrentCategory == null
+                || CurrentCategory.GetModelCategoryId() != NavCategoryStates.Serialize(ViewMode.SapUnit))
+            {
+                return false;
+            }
+
+            Unit from = null;
+            Unit to = null;
+            Unit defaultFrom = null;
+            Unit defaultTo = null;
+            foreach (var unit in Units)
+            {
+                if (unit.ModelUnitID() == fromUnit.Id) from = unit;
+                if (unit.ModelUnitID() == toUnit.Id) to = unit;
+                if (unit.Abbreviation == DataLoaders.SapUnitsOfMeasure.DefaultFrom) defaultFrom = unit;
+                if (unit.Abbreviation == DataLoaders.SapUnitsOfMeasure.DefaultTo) defaultTo = unit;
+            }
+
+            if (from != null && to != null && from != to)
+            {
+                return false;
+            }
+
+            if (defaultFrom == null || defaultTo == null)
+            {
+                return false;
+            }
+
+            UnitFrom = defaultFrom;
+            UnitTo = defaultTo;
+            return true;
         }
 
         private void SetSelectedCurrencyUnits()
