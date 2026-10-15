@@ -12,7 +12,7 @@ namespace CalculatorUITestFramework
 {
     public sealed class CalculatorDriver
     {
-        private const string defaultAppId = "Microsoft.WindowsCalculator.Dev_8wekyb3d8bbwe!App";
+        private const string defaultAppId = "DevBispo.CalculadoraSAP!App";
 
         private static CalculatorDriver instance = null;
         public static CalculatorDriver Instance

@@ -204,6 +204,10 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       name: Setup dev tools
     - run: |
+        $pfn = (Get-AppxPackage -Name 'DevBispo.CalculadoraSAP').PackageFamilyName
+        if (-not $pfn) { throw 'DevBispo.CalculadoraSAP is not installed' }
+        $settings = '${{ github.workspace }}\download\publish\CalculatorUITests.ci.runsettings'
+        (Get-Content $settings -Raw) -replace 'Name="AppId" Value="[^"]*"', "Name=`"AppId`" Value=`"$pfn!App`"" | Set-Content $settings
         vstest.console.exe ${{ github.workspace }}\download\publish\CalculatorUITests.dll `
           /Platform:x64 `
           /Settings:${{ github.workspace }}\download\publish\CalculatorUITests.ci.runsettings
