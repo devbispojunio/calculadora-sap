@@ -84,7 +84,7 @@ git clone https://github.com/devbispojunio/calculadora-sap.git
 - Os códigos e fatores seguem o padrão da T006. Se o seu sistema tiver unidades customizadas (Z) ou códigos diferentes, confira na **CUNI** e ajuste o `SapUnitsOfMeasure.cs`.
 - Unidades de embalagem (CX, PAL, FD...) não têm fator fixo — use o **Fator do material**.
 - O mês (MON) é considerado 30 dias e o ano (YR) 365 dias.
-- Os testes automáticos originais de navegação ainda esperam 13 conversores (agora são 14).
+- Telemetria: os eventos de diagnóstico (TraceLogging) herdados do projeto original estão desativados neste fork; o app não envia dados para ninguém.
 
 ## Créditos e licença
 

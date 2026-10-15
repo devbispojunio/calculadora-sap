@@ -110,7 +110,7 @@ namespace Calculator.Tests
             Assert.AreEqual(CategoryGroupType.Converter, converterGroup.GroupType);
 
             var converterCategories = converterGroup.Categories;
-            Assert.AreEqual(13, converterCategories.Count);
+            Assert.AreEqual(14, converterCategories.Count);
             ValidateNavCategory(converterCategories, 0, ViewMode.Currency);
             ValidateNavCategory(converterCategories, 1, ViewMode.Volume);
             ValidateNavCategory(converterCategories, 2, ViewMode.Length);
@@ -124,6 +124,7 @@ namespace Calculator.Tests
             ValidateNavCategory(converterCategories, 10, ViewMode.Data);
             ValidateNavCategory(converterCategories, 11, ViewMode.Pressure);
             ValidateNavCategory(converterCategories, 12, ViewMode.Angle);
+            ValidateNavCategory(converterCategories, 13, ViewMode.SapUnit);
         }
 
         private void ValidateNavCategory(IList<NavCategory> categories, int index, ViewMode expectedMode)

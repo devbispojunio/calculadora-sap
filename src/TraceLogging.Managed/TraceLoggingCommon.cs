@@ -49,7 +49,8 @@ namespace TraceLogging
 
         public bool GetTraceLoggingProviderEnabled()
         {
-            return g_calculatorProvider.Enabled;
+            // Telemetria desativada neste fork: nenhum evento de diagnóstico é emitido.
+            return false;
         }
 
         // As mentioned in Microsoft's Privacy Statement(https://privacy.microsoft.com/en-US/privacystatement#maindiagnosticsmodule),
