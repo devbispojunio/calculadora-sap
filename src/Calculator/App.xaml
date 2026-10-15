@@ -45,6 +45,10 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default">
                     <Thickness x:Key="ControlBorderThemeThickness">0</Thickness>
+                    <!-- SAP Fiori style: white text on the blue "=" (accent) button in dark theme -->
+                    <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#FFFFFFFF"/>
+                    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#CCFFFFFF"/>
                     <Thickness x:Key="HighContrastThicknessTop">0,0,0,0</Thickness>
                     <x:Double x:Key="HighContrastStrokeThickness">0</x:Double>
                     <Color x:Key="AltHighColor">#FF000000</Color>
@@ -327,6 +331,16 @@
                     <StaticResource x:Key="AppControlBackgroundSecondaryBrush" ResourceKey="SystemControlHighlightTransparentBrush"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
+
+            <!-- SAP blue accent override (SAP Fiori Horizon #0070F2): replaces the user's Windows accent color across the app -->
+            <Color x:Key="SystemAccentColor">#FF0070F2</Color>
+            <Color x:Key="SystemAccentColorDark1">#FF0064D9</Color>
+            <Color x:Key="SystemAccentColorDark2">#FF0050B3</Color>
+            <Color x:Key="SystemAccentColorDark3">#FF003D8A</Color>
+            <!-- Dark theme uses the Light tones for accent fills: map them to real SAP blue -->
+            <Color x:Key="SystemAccentColorLight1">#FF0064D9</Color>
+            <Color x:Key="SystemAccentColorLight2">#FF0070F2</Color>
+            <Color x:Key="SystemAccentColorLight3">#FF4DB1FF</Color>
 
             <!-- Min Window Height/Width -->
             <x:Double x:Key="AppMinWindowHeight">500</x:Double>
