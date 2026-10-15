@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Text;
 using CalculatorApp.ViewModel.Common;
 using CalculatorApp.ViewModel.Common.Automation;
@@ -112,6 +113,14 @@ namespace CalculatorApp.ViewModel
         // Model
         private readonly CalcManager.Interop.UnitConverterWrapper _model;
         private readonly object _modelLock = new object();
+
+        // Unidade SAP: material factor ("1 PC = 1000 M2"), like MARM
+        private readonly DataLoaders.UnitConverterDataLoader _unitDataLoader;
+        private bool _isSapFactorVisible;
+        private string _sapFactorPrefix = string.Empty;
+        private string _sapFactorSuffix = string.Empty;
+        private string _sapFactorText = string.Empty;
+        private bool _updatingSapFactor;
         private readonly DataLoaders.CurrencyDataLoader _currencyDataLoader;
         private readonly Windows.UI.Core.CoreDispatcher _dispatcher;
         private char _decimalSeparator;
@@ -300,6 +309,7 @@ namespace CalculatorApp.ViewModel
             // Create the real native engine via interop
             var dataLoader = new DataLoaders.UnitConverterDataLoader(new Windows.Globalization.GeographicRegion());
             _model = new CalcManager.Interop.UnitConverterWrapper(dataLoader);
+            _unitDataLoader = dataLoader;
 
             // Create currency data loader
             _currencyDataLoader = new DataLoaders.CurrencyDataLoader();
@@ -382,6 +392,120 @@ namespace CalculatorApp.ViewModel
         }
 
         internal bool IsCurrencyDataLoaded => _isCurrencyDataLoaded;
+
+        /// <summary>Shows the material factor field (SAP units of different dimensions, e.g. M2 -> PC).</summary>
+        public bool IsSapFactorVisible
+        {
+            get => _isSapFactorVisible;
+            private set => SetProperty(ref _isSapFactorVisible, value);
+        }
+
+        /// <summary>Text before the factor box, e.g. "1 PC =".</summary>
+        public string SapFactorPrefix
+        {
+            get => _sapFactorPrefix;
+            private set => SetProperty(ref _sapFactorPrefix, value);
+        }
+
+        /// <summary>Text after the factor box, e.g. "M2".</summary>
+        public string SapFactorSuffix
+        {
+            get => _sapFactorSuffix;
+            private set => SetProperty(ref _sapFactorSuffix, value);
+        }
+
+        /// <summary>Material factor typed by the user: "1 {To} = SapFactorText {From}".</summary>
+        public string SapFactorText
+        {
+            get => _sapFactorText;
+            set
+            {
+                if (SetProperty(ref _sapFactorText, value ?? string.Empty) && !_updatingSapFactor)
+                {
+                    ApplySapFactorText();
+                }
+            }
+        }
+
+        private void UpdateSapFactorState()
+        {
+            bool visible = UnitFrom != null && UnitTo != null
+                && _unitDataLoader.CanUseSapMaterialFactor(UnitFrom.ModelUnitID(), UnitTo.ModelUnitID());
+            IsSapFactorVisible = visible;
+            if (!visible)
+            {
+                return;
+            }
+
+            SapFactorPrefix = "1 " + UnitTo.Abbreviation + " =";
+            SapFactorSuffix = UnitFrom.Abbreviation;
+
+            double? k = _unitDataLoader.GetSapMaterialFactor(UnitTo.ModelUnitID(), UnitFrom.ModelUnitID());
+            _updatingSapFactor = true;
+            try
+            {
+                SapFactorText = k.HasValue ? FormatSapFactor(k.Value) : string.Empty;
+            }
+            finally
+            {
+                _updatingSapFactor = false;
+            }
+        }
+
+        private void ApplySapFactorText()
+        {
+            if (!IsSapFactorVisible || UnitFrom == null || UnitTo == null || CurrentCategory == null)
+            {
+                return;
+            }
+
+            _unitDataLoader.SetSapMaterialFactor(UnitTo.ModelUnitID(), UnitFrom.ModelUnitID(), ParseSapFactor(_sapFactorText));
+
+            // Reload the ratios in the native engine and restore the current category/units.
+            lock (_modelLock)
+            {
+                _model.ResetCategoriesAndRatios();
+                _model.SetCurrentCategory(
+                    new CalcManager.Interop.CategoryWrapper
+                    {
+                        Id = CurrentCategory.GetModelCategoryId(),
+                        Name = CurrentCategory.Name,
+                        SupportsNegative = CurrentCategory.NegateVisibility == Windows.UI.Xaml.Visibility.Visible
+                    });
+                _model.SetCurrentUnitTypes(
+                    new CalcManager.Interop.UnitWrapper { Id = UnitFrom.ModelUnitID(), Name = UnitFrom.Name, Abbreviation = UnitFrom.Abbreviation, AccessibleName = UnitFrom.AccessibleName },
+                    new CalcManager.Interop.UnitWrapper { Id = UnitTo.ModelUnitID(), Name = UnitTo.Name, Abbreviation = UnitTo.Abbreviation, AccessibleName = UnitTo.AccessibleName });
+            }
+        }
+
+        private double? ParseSapFactor(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return null;
+            }
+
+            char groupSeparator = LocalizationSettings.GetInstance().GetNumberGroupSeparator();
+            string normalized = text.Trim().Replace(" ", string.Empty).Replace("\u00A0", string.Empty);
+            if (groupSeparator != _decimalSeparator)
+            {
+                normalized = normalized.Replace(groupSeparator.ToString(), string.Empty);
+            }
+            normalized = normalized.Replace(_decimalSeparator, '.');
+
+            if (double.TryParse(normalized, NumberStyles.Float, CultureInfo.InvariantCulture, out double value)
+                && value > 0 && !double.IsInfinity(value))
+            {
+                return value;
+            }
+
+            return null;
+        }
+
+        private string FormatSapFactor(double value)
+        {
+            return value.ToString("0.##########", CultureInfo.InvariantCulture).Replace('.', _decimalSeparator);
+        }
 
         public Category CurrentCategory
         {
@@ -828,6 +952,8 @@ namespace CalculatorApp.ViewModel
                 CurrencyRatioEquality = string.Empty;
                 CurrencyRatioEqualityAutomationName = string.Empty;
             }
+
+            UpdateSapFactorState();
 
             // Always tell the native engine the current unit types (matches C++ behavior)
             lock (_modelLock)

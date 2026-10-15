@@ -1,76 +1,93 @@
-# Calculator
-The Windows Calculator app is a modern Windows app written in C++ and C# that ships pre-installed with Windows.
-The app provides standard, scientific, and programmer calculator functionality, as well as a set of converters between various units of measurement and currencies.
+# Calculadora SAP
 
-Calculator ships regularly with new features and bug fixes. You can get the latest version of Calculator in the [Microsoft Store](https://www.microsoft.com/store/apps/9WZDNCRFHVN5).
+**Calculadora do Windows com conversor de Unidades de Medida do SAP (MEINS)** — feita para quem trabalha com SAP MM, EWM e Master Data e precisa converter unidades rapidamente, sem abrir o sistema.
 
-[![Continuous Integration](https://github.com/microsoft/calculator/actions/workflows/action-ci.yml/badge.svg)](https://github.com/microsoft/calculator/actions/workflows/action-ci.yml)
+> ⚠️ **Projeto não oficial.** Este é um fork da [Windows Calculator](https://github.com/microsoft/calculator) (open source, licença MIT). Não é um produto da Microsoft e não tem vínculo com a SAP SE. "SAP" é usado apenas para descrever a finalidade da ferramenta.
 
-<img src="docs/Images/CalculatorScreenshot.png" alt="Calculator Screenshot" width="450px" />
+<p>
+  <img src="docs/Images/sap-m2-para-pc.png" alt="Conversão de M2 para PC com fator do material" width="300px" />
+  &nbsp;&nbsp;
+  <img src="docs/Images/sap-g-para-pc.png" alt="Conversão de G para PC com fator do material" width="300px" />
+</p>
 
-## Features
-- Standard Calculator functionality which offers basic operations and evaluates commands immediately as they are entered.
-- Scientific Calculator functionality which offers expanded operations and evaluates commands using order of operations.
-- Programmer Calculator functionality which offers common mathematical operations for developers including conversion between common bases.
-- Date Calculation functionality which offers the difference between two dates, as well as the ability to add/subtract years, months and/or days to/from a given input date.
-- Calculation history and memory capabilities.
-- Conversion between many units of measurement.
-- Currency conversion based on data retrieved from [Bing](https://www.bing.com).
-- [Infinite precision](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic) for basic
-  arithmetic operations (addition, subtraction, multiplication, division) so that calculations
-  never lose precision.
+## O que tem de novo
 
-## Getting started
-Prerequisites:
-- Your computer must be running Windows 11, build 22000 or newer.
-- Install the latest version of [Visual Studio](https://developer.microsoft.com/en-us/windows/downloads) (the free community edition is sufficient).
-  - Install the "Universal Windows Platform Development" workload.
-  - Install the optional "C++ Universal Windows Platform tools" component.
-  - Install the latest Windows 11 SDK.
+### Conversor "Unidade de Medida (SAP)"
 
-  ![Visual Studio Installation Screenshot](docs/Images/VSInstallationScreenshot.png)
-- Install the [XAML Styler](https://marketplace.visualstudio.com/items?itemName=TeamXavalon.XAMLStyler) Visual Studio extension.
+Novo tipo de conversor no menu, logo acima de **Moeda**, com as unidades padrão da tabela **T006** (transação **CUNI**), agrupadas por dimensão como no SAP:
 
-- Get the code:
-    ```
-    git clone https://github.com/Microsoft/calculator.git
-    ```
+| Dimensão | Unidades |
+|---|---|
+| Massa | MG, G, KG, TO, OZ, LB, TON |
+| Volume | MM3, ML, CM3 (CCM), L, DM3 (CDM), HL, M3, IN3, PT, QT, GAL (GLL), GLI, FT3, YD3 |
+| Comprimento | µM (MIM), MM, CM, DM, M, KM, IN, FT, YD, MI |
+| Área | MM2 (MMK), CM2, DM2, M2, HA (HAR), KM2 (KMK), IN2, FT2, YD2, ACR, MI2 |
+| Quantidade | PC (ST), DZN, GRO |
+| Proporção | %, ‰, PPM |
+| Tempo | MS, S, MIN, H, DAY (TAG), WK (WCH), MON, YR (JHR) |
+| Temperatura | °C (CEL), °F (FA), K |
+| Energia | J, KJ, MJ, KWH |
+| Potência | W, KW, MW |
+| Pressão | PA, MBAR, KPA, PSI, BAR |
+| Velocidade | KM/H, M/S |
 
-- Open [src\Calculator.slnx](/src/Calculator.slnx) in Visual Studio to build and run the Calculator app.
-- For a general description of the Calculator project architecture see [ApplicationArchitecture.md](docs/ApplicationArchitecture.md).
-- To run the UI Tests, you need to make sure that
-  [Windows Application Driver (WinAppDriver)](https://github.com/microsoft/WinAppDriver/releases/latest)
-  is installed.
+Cada unidade aparece como **código externo (código interno) — descrição · dimensão**, por exemplo `PC (ST) — Peça · Quantidade`, para você enxergar exatamente o que fica gravado no campo **MEINS**.
 
-## Contributing
-Want to contribute? The team encourages community feedback and contributions. Please follow our [contributing guidelines](CONTRIBUTING.md).
+Exemplo: `1000 G = 1 KG`, `1 DZN = 12 PC`, `1 HL = 100 L`.
 
-If Calculator is not working properly, please file a report in the [Feedback Hub](https://insider.windows.com/en-us/fb/?contextid=130).
-We also welcome [issues submitted on GitHub](https://github.com/Microsoft/calculator/issues).
+### Fator do material (estilo MARM)
 
-## Roadmap
-For information regarding Windows Calculator plans and release schedule, please see the [Windows Calculator Roadmap](docs/Roadmap.md).
+No SAP, conversões entre dimensões diferentes (ex.: **M2 → PC** ou **G → PC**) dependem do material e ficam na **MARM** (MM03 › Unidades de medida alternativas). A calculadora reproduz isso:
 
-### Graphing Mode
-Adding graphing calculator functionality [is on the project roadmap](https://github.com/Microsoft/calculator/issues/338) and we hope that this project can create a great end-user experience around graphing. To that end, the UI from the official in-box Windows Calculator is currently part of this repository, although the proprietary Microsoft-built graphing engine, which also drives graphing in Microsoft Mathematics and OneNote, is not. Community members can still be involved in the creation of the UI, however developer builds will not have graphing functionality due to the use of a [mock implementation of the engine](/src/GraphingImpl/Mocks) built on top of a
-[common graphing API](/src/GraphingInterfaces).
+1. Escolha duas unidades de dimensões diferentes (ex.: `M2` → `PC`).
+2. Aparece o campo **Fator do material (MARM)**: `1 PC = [ 1000 ] M2`.
+3. Pronto — `1000 M2 = 1 PC`, e o fator vale para todas as unidades das mesmas dimensões (HA, FT2, DZN...).
 
-## Diagnostic Data
-This project collects usage data and sends it to Microsoft to help improve our products and services.
-Read our [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839) to learn more.
-Diagnostic data is disabled in development builds by default, and can be enabled with the `SEND_DIAGNOSTICS`
-build flag.
+Dá para ter vários fatores ao mesmo tempo (ex.: `1 PC = 1000 M2` e `1 PC = 1000 G`). Para remover, basta apagar o campo.
 
-## Currency Converter
-Windows Calculator includes a currency converter feature that uses mock data in developer builds. The data that
-Microsoft uses for the currency converter feature (e.g., in the retail version of the application) is not licensed
-for your use. The mock data will be clearly identifiable as it references planets instead of countries,
-and remains static regardless of selected inputs.
+> Os fatores ficam ativos enquanto o app estiver aberto.
 
-## Reporting Security Issues
-Please refer to [SECURITY.md](./SECURITY.md).
+### Tema azul
 
-## License
-Copyright (c) Microsoft Corporation. All rights reserved.
+Visual da calculadora ajustado para o azul, inspirado na identidade do SAP.
 
-Licensed under the [MIT License](./LICENSE).
+## Como compilar
+
+Pré-requisitos (iguais ao projeto original):
+
+- Windows 11 (build 22000 ou superior).
+- [Visual Studio](https://visualstudio.microsoft.com/) com a carga de trabalho **Desenvolvimento para a Plataforma Universal do Windows** e o componente opcional **Ferramentas da Plataforma Universal do Windows para C++**.
+- Windows 11 SDK mais recente.
+
+Passos:
+
+```
+git clone https://github.com/devbispojunio/calculadora-sap.git
+```
+
+1. Abra `src\Calculator.slnx` no Visual Studio.
+2. Selecione **Debug | x64** e o projeto **Calculator** como inicialização.
+3. **Build › Rebuild Solution** e depois **F5**.
+
+## Onde está o código
+
+| Arquivo | O que faz |
+|---|---|
+| `src/Calculator.ViewModels/DataLoaders/SapUnitsOfMeasure.cs` | Tabela das unidades SAP (código interno/externo, dimensão e fator para o SI). Para incluir uma unidade Z, basta adicionar uma linha. |
+| `src/Calculator.ViewModels/DataLoaders/UnitConverterDataLoader.cs` | Carrega as unidades no motor de conversão e calcula os fatores do material. |
+| `src/Calculator.ViewModels/UnitConverterViewModel.cs` | Lógica do campo "Fator do material". |
+| `src/Calculator/Views/UnitConverter.xaml` | Tela do conversor (campo do fator). |
+| `src/Calculator.ViewModels/Common/NavCategory.cs` | Novo item "Unidade de Medida (SAP)" no menu. |
+
+## Observações
+
+- Os códigos e fatores seguem o padrão da T006. Se o seu sistema tiver unidades customizadas (Z) ou códigos diferentes, confira na **CUNI** e ajuste o `SapUnitsOfMeasure.cs`.
+- Unidades de embalagem (CX, PAL, FD...) não têm fator fixo — use o **Fator do material**.
+- O mês (MON) é considerado 30 dias e o ano (YR) 365 dias.
+- Os testes automáticos originais de navegação ainda esperam 13 conversores (agora são 14).
+
+## Créditos e licença
+
+- Baseado na [Windows Calculator](https://github.com/microsoft/calculator) — Copyright (c) Microsoft Corporation, licença MIT. O README original está em [docs/README-original.md](docs/README-original.md).
+- Conversor SAP e fator do material: **Junio Garcia Bispo**.
+- Distribuído sob a licença [MIT](LICENSE).

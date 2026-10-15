@@ -417,6 +417,17 @@ namespace CalculatorApp
             RowDltrUnits.MinHeight = Math.Max(48.0, e.NewSize.Height + 0.01);
         }
 
+        // While typing the SAP material factor, digits must go to the TextBox and not to the calculator keypad.
+        private void SapFactorTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            KeyboardShortcutManager.HonorShortcuts(false);
+        }
+
+        private void SapFactorTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            KeyboardShortcutManager.HonorShortcuts(true);
+        }
+
         private void OnVisualStateChanged(object sender, Windows.UI.Xaml.VisualStateChangedEventArgs e)
         {
             if (ViewModel?.CurrentCategory == null) return;

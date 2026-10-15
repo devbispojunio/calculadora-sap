@@ -36,7 +36,8 @@ namespace CalculatorApp.ViewModel.Common
         Pressure = 14,
         Angle = 15,
         Currency = 16,
-        Graphing = 17
+        Graphing = 17,
+        SapUnit = 18
     }
 
     public enum CategoryGroupType
@@ -238,6 +239,7 @@ namespace CalculatorApp.ViewModel.Common
         private const int AngleId = 15;
         private const int CurrencyId = 16;
         private const int GraphingId = 17;
+        private const int SapUnitId = 18;
         // ^^^ THESE CONSTANTS SHOULD NEVER CHANGE ^^^
 
         private static string _currentUserId;
@@ -249,6 +251,7 @@ namespace CalculatorApp.ViewModel.Common
             new NavCategoryInitializer { ViewMode = ViewMode.Graphing, SerializationId = GraphingId, FriendlyName = "Graphing", NameResourceKey = "GraphingCalculatorMode", Glyph = "\uF770", GroupType = CategoryGroupType.Calculator, VirtualKey = MyVirtualKey.Number3, AccessKey = "3", SupportsNegative = SupportsAll },
             new NavCategoryInitializer { ViewMode = ViewMode.Programmer, SerializationId = ProgrammerId, FriendlyName = "Programmer", NameResourceKey = "ProgrammerMode", Glyph = "\uECCE", GroupType = CategoryGroupType.Calculator, VirtualKey = MyVirtualKey.Number4, AccessKey = "4", SupportsNegative = SupportsAll },
             new NavCategoryInitializer { ViewMode = ViewMode.Date, SerializationId = DateId, FriendlyName = "Date", NameResourceKey = "DateCalculationMode", Glyph = "\uE787", GroupType = CategoryGroupType.Calculator, VirtualKey = MyVirtualKey.Number5, AccessKey = "5", SupportsNegative = SupportsAll },
+            new NavCategoryInitializer { ViewMode = ViewMode.SapUnit, SerializationId = SapUnitId, FriendlyName = "SapUnit", NameResourceKey = "CategoryName_SapUnit", Glyph = "\uE7B8", GroupType = CategoryGroupType.Converter, VirtualKey = MyVirtualKey.None, AccessKey = null, SupportsNegative = PositiveOnly },
             new NavCategoryInitializer { ViewMode = ViewMode.Currency, SerializationId = CurrencyId, FriendlyName = "Currency", NameResourceKey = "CategoryName_Currency", Glyph = "\uEB0D", GroupType = CategoryGroupType.Converter, VirtualKey = MyVirtualKey.None, AccessKey = null, SupportsNegative = PositiveOnly },
             new NavCategoryInitializer { ViewMode = ViewMode.Volume, SerializationId = VolumeId, FriendlyName = "Volume", NameResourceKey = "CategoryName_Volume", Glyph = "\uF1AA", GroupType = CategoryGroupType.Converter, VirtualKey = MyVirtualKey.None, AccessKey = null, SupportsNegative = PositiveOnly },
             new NavCategoryInitializer { ViewMode = ViewMode.Length, SerializationId = LengthId, FriendlyName = "Length", NameResourceKey = "CategoryName_Length", Glyph = "\uECC6", GroupType = CategoryGroupType.Converter, VirtualKey = MyVirtualKey.None, AccessKey = null, SupportsNegative = PositiveOnly },

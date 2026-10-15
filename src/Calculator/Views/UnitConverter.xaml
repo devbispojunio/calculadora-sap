@@ -639,6 +639,32 @@
                                         VerticalAlignment="Center"
                                         Results="{x:Bind ViewModel.SupplementaryResults, Mode=OneWay}"
                                         Visibility="{x:Bind ViewModel.SupplementaryVisibility, Mode=OneWay}"/>
+            <!-- Unidade de Medida (SAP): fator do material, igual à MARM (ex.: 1 PC = 1000 M2) -->
+            <StackPanel x:Name="SapFactorPanel"
+                        Margin="16,4,0,4"
+                        Visibility="{x:Bind ViewModel.IsSapFactorVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
+                           Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}"
+                           Text="Fator do material (MARM)"/>
+                <StackPanel Margin="0,4,0,0" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center"
+                               Style="{ThemeResource BodyTextBlockStyle}"
+                               Text="{x:Bind ViewModel.SapFactorPrefix, Mode=OneWay}"/>
+                    <TextBox x:Name="SapFactorTextBox"
+                             Width="120"
+                             Margin="8,0,8,0"
+                             VerticalAlignment="Center"
+                             AutomationProperties.Name="Fator do material"
+                             GotFocus="SapFactorTextBox_GotFocus"
+                             InputScope="Number"
+                             LostFocus="SapFactorTextBox_LostFocus"
+                             PlaceholderText="ex.: 1000"
+                             Text="{x:Bind ViewModel.SapFactorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock VerticalAlignment="Center"
+                               Style="{ThemeResource BodyTextBlockStyle}"
+                               Text="{x:Bind ViewModel.SapFactorSuffix, Mode=OneWay}"/>
+                </StackPanel>
+            </StackPanel>
             <StackPanel Visibility="{x:Bind ViewModel.IsCurrencyCurrentCategory, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <!-- Currency Ratio Equality -->
                 <TextBlock x:Name="CurrencyRatioEqualityBlock"

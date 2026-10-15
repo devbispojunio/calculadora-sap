@@ -1541,6 +1541,14 @@
     <value>Angle</value>
     <comment>Unit conversion category name called Angle</comment>
   </data>
+  <data name="CategoryName_SapUnitText" xml:space="preserve">
+    <value>Unit of Measure (SAP)</value>
+    <comment>Unit conversion category name for SAP units of measure (MEINS)</comment>
+  </data>
+  <data name="CategoryName_SapUnitAccessKey" xml:space="preserve">
+    <value>U</value>
+    <comment>AccessKey for the SAP unit converter navbar item. {StringCategory="Accelerator"}</comment>
+  </data>
   <data name="CategoryName_CurrencyText" xml:space="preserve">
     <value>Currency</value>
     <comment>Unit conversion category name called Currency</comment>

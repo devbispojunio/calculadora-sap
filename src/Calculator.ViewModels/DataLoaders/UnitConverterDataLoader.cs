@@ -224,6 +224,7 @@ namespace CalculatorApp.ViewModel.DataLoaders
             // (MainPage.GetIndexInGroup counts Currency when computing the category index)
             var converterModes = new[]
             {
+                ViewMode.SapUnit,
                 ViewMode.Currency,
                 ViewMode.Volume, ViewMode.Length, ViewMode.Weight,
                 ViewMode.Temperature, ViewMode.Energy, ViewMode.Area,
@@ -456,6 +457,30 @@ namespace CalculatorApp.ViewModel.DataLoaders
             AddUnit(ViewMode.Angle, Angle_Degree, "UnitName_Degree", "UnitAbbreviation_Degree", 1, true, false);
             AddUnit(ViewMode.Angle, Angle_Radian, "UnitName_Radian", "UnitAbbreviation_Radian", 2, false, true);
             AddUnit(ViewMode.Angle, Angle_Gradian, "UnitName_Gradian", "UnitAbbreviation_Gradian", 3);
+
+            // ---- Unidade SAP (MEINS) ----
+            // Units come from SapUnitsOfMeasure (T006 standard units), with Portuguese names built in.
+            _sapUnits.Clear();
+            {
+                int sapCatId = NavCategoryStates.Serialize(ViewMode.SapUnit);
+                unitsByCategory[sapCatId] = new List<(UnitWrapper, int)>();
+                for (int i = 0; i < SapUnitsOfMeasure.All.Length; i++)
+                {
+                    var sap = SapUnitsOfMeasure.All[i];
+                    int id = SapUnitsOfMeasure.FirstId + i;
+                    _sapUnits[id] = sap;
+                    unitsByCategory[sapCatId].Add((new UnitWrapper
+                    {
+                        Id = id,
+                        Name = sap.DisplayName,
+                        AccessibleName = sap.Description + " " + sap.ExternalCode,
+                        Abbreviation = sap.ExternalCode,
+                        IsConversionSource = sap.ExternalCode == SapUnitsOfMeasure.DefaultFrom,
+                        IsConversionTarget = sap.ExternalCode == SapUnitsOfMeasure.DefaultTo,
+                        IsWhimsical = false
+                    }, i));
+                }
+            }
 
             // Sort units by order and store
             _unitsByCategory = new Dictionary<int, UnitWrapper[]>();
@@ -761,7 +786,124 @@ namespace CalculatorApp.ViewModel.DataLoaders
                     _ratiosByUnit[sourceUnit.Id] = entries.ToArray();
                 }
             }
+
+            // Unidade SAP: ratios are built separately so they can be rebuilt when a material factor changes.
+            BuildSapRatios();
         }
+
+        #region Unidade SAP (MEINS) - fator do material
+
+        // SAP units loaded in LoadData, by unit id.
+        private readonly Dictionary<int, SapUnitOfMeasure> _sapUnits = new Dictionary<int, SapUnitOfMeasure>();
+
+        // Material bridges between dimensions: _sapBridges[(D1, D2)] = how many SI units of D2 equal 1 SI unit of D1.
+        // Example: "1 PC = 1000 M2" -> [(Quantidade, Área)] = 1000 and [(Área, Quantidade)] = 0.001.
+        private readonly Dictionary<(string, string), double> _sapBridges = new Dictionary<(string, string), double>();
+
+        /// <summary>True when both units are SAP units of different dimensions that can be linked by a material factor.</summary>
+        internal bool CanUseSapMaterialFactor(int fromId, int toId)
+        {
+            return _sapUnits.TryGetValue(fromId, out var a)
+                && _sapUnits.TryGetValue(toId, out var b)
+                && a.Dimension != b.Dimension
+                && a.AllowsMaterialFactor
+                && b.AllowsMaterialFactor;
+        }
+
+        /// <summary>Returns k where "1 unitA = k unitB" for the current material, or null when not set.</summary>
+        internal double? GetSapMaterialFactor(int unitAId, int unitBId)
+        {
+            if (!CanUseSapMaterialFactor(unitAId, unitBId))
+            {
+                return null;
+            }
+
+            var a = _sapUnits[unitAId];
+            var b = _sapUnits[unitBId];
+            if (_sapBridges.TryGetValue((a.Dimension, b.Dimension), out double bridge))
+            {
+                return bridge * (double)a.Factor / (double)b.Factor;
+            }
+
+            return null;
+        }
+
+        /// <summary>Sets "1 unitA = k unitB" (like MARM). A null or non-positive k removes the link.</summary>
+        internal void SetSapMaterialFactor(int unitAId, int unitBId, double? k)
+        {
+            if (!CanUseSapMaterialFactor(unitAId, unitBId))
+            {
+                return;
+            }
+
+            var a = _sapUnits[unitAId];
+            var b = _sapUnits[unitBId];
+            if (k.HasValue && k.Value > 0 && !double.IsInfinity(k.Value) && !double.IsNaN(k.Value))
+            {
+                double bridge = k.Value * (double)b.Factor / (double)a.Factor;
+                _sapBridges[(a.Dimension, b.Dimension)] = bridge;
+                _sapBridges[(b.Dimension, a.Dimension)] = 1.0 / bridge;
+            }
+            else
+            {
+                _sapBridges.Remove((a.Dimension, b.Dimension));
+                _sapBridges.Remove((b.Dimension, a.Dimension));
+            }
+
+            BuildSapRatios();
+        }
+
+        private void BuildSapRatios()
+        {
+            if (_unitsByCategory == null || _ratiosByUnit == null)
+            {
+                return;
+            }
+
+            if (!_unitsByCategory.TryGetValue(NavCategoryStates.Serialize(ViewMode.SapUnit), out var wrappers))
+            {
+                return;
+            }
+
+            foreach (var src in wrappers)
+            {
+                if (!_sapUnits.TryGetValue(src.Id, out var s))
+                {
+                    continue;
+                }
+
+                // Every pair gets an entry (0 when not convertible) so the native engine never reads an uninitialized ratio.
+                var entries = new UnitConversionEntry[wrappers.Length];
+                for (int i = 0; i < wrappers.Length; i++)
+                {
+                    var dst = wrappers[i];
+                    var d = _sapUnits[dst.Id];
+                    double ratio = 0;
+                    double offset = 0;
+
+                    if (s.Dimension == d.Dimension)
+                    {
+                        (ratio, offset) = SapUnitsOfMeasure.GetConversion(s, d);
+                    }
+                    else if (_sapBridges.TryGetValue((s.Dimension, d.Dimension), out double bridge))
+                    {
+                        ratio = (double)s.Factor * bridge / (double)d.Factor;
+                    }
+
+                    entries[i] = new UnitConversionEntry
+                    {
+                        Unit = dst,
+                        Ratio = ratio,
+                        Offset = offset,
+                        OffsetFirst = false
+                    };
+                }
+
+                _ratiosByUnit[src.Id] = entries;
+            }
+        }
+
+        #endregion
 
         protected override CategoryWrapper[] GetOrderedCategories()
         {
